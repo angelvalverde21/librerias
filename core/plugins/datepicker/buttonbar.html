@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>jQuery UI Datepicker - Display button bar</title>
+	<link rel="stylesheet" href="jquery.ui.all.css">
+	<script src="jquery-1.7.1.js"></script>
+	<script src="jquery.ui.core.js"></script>
+	<script src="jquery.ui.widget.js"></script>
+	<script src="jquery.ui.datepicker.js"></script>
+	<link rel="stylesheet" href="demos.css">
+	<script>
+	$(function() {
+		$( "#datepicker" ).datepicker({
+			showButtonPanel: true
+		});
+	});
+	</script>
+	
+	<!-- jquery lighbox plugn -->
+<link rel="stylesheet" type="text/css" href="http://www.aquarella.com.pe/wp-content/themes/aqua/galeria/style-projects-jquery.css" />    
+<!-- Arquivos utilizados pelo jQuery lightBox plugin -->
+<script type="text/javascript" src="http://www.aquarella.com.pe/wp-content/themes/aqua/galeria/jquery.lightbox-0.5.js"></script>
+<link rel="stylesheet" type="text/css" href="http://www.aquarella.com.pe/wp-content/themes/aqua/galeria/jquery.lightbox-0.5.css" media="screen" />
+<!-- / fim dos arquivos utilizados pelo jQuery lightBox plugin -->
+<!-- find e imagen principal facebook -->	
+	
+<!-- Ativando o jQuery lightBox plugin -->
+<script type="text/javascript">
+    $(function() {
+        $('#gallery a').lightBox();
+    });
+</script>
+
+<script type="text/javascript">
+    $(function() {
+        $('#imagenprincipal a').lightBox();
+    });
+</script>
+</head>
+<body>
+
+<div class="demo">
+
+<p>Date: <input type="text" id="datepicker"></p>
+
+</div><!-- End demo -->
+
+
+
+<div class="demo-description">
+<p>Display a button for selecting Today's date and a Done button for closing the calendar with the boolean <code>showButtonPanel</code> option.  Each button is enabled by default when the bar is displayed, but can be turned off with additional options.  Button text is customizable.</p>
+</div><!-- End demo-description -->
+
+</body>
+</html>
