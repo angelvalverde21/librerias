@@ -46,7 +46,7 @@
 
 			//Muestra un listado de registros filtrado por IDUSUARIO
 			
-			$result = $db->consulta("SELECT * FROM ".PREFIX.$_POST['TABLA']." WHERE ".$_POST['KEY_PARENT']."='".$_POST['KEY_PARENT_VALUE']."' LIMIT 10");
+			$result = $db->consulta("SELECT * FROM ".PREFIX.$_POST['TABLA']." WHERE ".$_POST['KEY_PARENT']."='".$_POST['KEY_PARENT_VALUE']."' LIMIT 100");
 			while($row = $db->recuperar_array($result)){
 				$array[]=$row;
 			}

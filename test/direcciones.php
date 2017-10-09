@@ -38,8 +38,8 @@
 		var idPrincipal 	= 'IDENVIO';
 		var labelSelect 	= 'CONSIGNATARIO';
 		var keyParent 		= 'IDUSUARIO';
-		var keyParentvalue 	= 1;
-		var keyValueInicial = 3;
+		var keyParentvalue 	= 1; //Se refiere al IDUSUARIO
+		var keyValueInicial = 18; //Se refiere al IDENVIO (IDENVIO es de la tabla primarioa o principal)
 
 		//funciones de uso general
 
@@ -116,9 +116,6 @@
 
 	 	showFicha = function(nameContentId,selected='',caso){
 
-	 		var caso;
-	 		var key_value = $("#"+nameContentId+" .key_value").val();
-
 			$.ajax({
 
 				type: "POST",
@@ -128,7 +125,7 @@
 					KEY_PARENT_VALUE 	: 	keyParentvalue,
 					TABLA 				: 	$("#"+nameContentId+" .tabla").val(),
 					KEY_TABLA 			: 	$("#"+nameContentId+" .key_tabla").val(),
-					KEY_VALUE 			: 	key_value,
+					KEY_VALUE 			: 	$("#"+nameContentId+" .key_value_static").val(),
 					CASO 				: 	caso
 				},
 
@@ -158,11 +155,9 @@
 
 						$("#"+nameContentId+" .respuesta-ficha").html(cadena); 	 
 						
-						//Asignando valores al KEY_VALUE
-
-						if(key_value=='undefined' || key_value == ''){
 							$("#"+nameContentId+" .key_value").val(objeto[i][idPrincipal]);
-						}
+							$("#"+nameContentId+" .key_value_static").val(objeto[i][idPrincipal]);
+						
 											
 					}
 					
@@ -213,23 +208,20 @@
 					//console.log(response); 
 					objeto = JSON.parse(response);
 
+					$("#"+nameContentId+" .key_value").val(objeto.KEY_VALUE);
+					$("#"+nameContentId+" .key_value_static").val(objeto.KEY_VALUE);
 
-					
-					if(objeto.TIPO_CONSULTA == 'INSERT'){
-						$("#"+nameContentId+" .key_value").val(objeto.KEY_VALUE);
+					if(objeto.TIPO_CONSULTA == 'INSERT' || objeto.TIPO_CONSULTA == 'UPDATE'){
 						showFicha(nameContentId,objeto.KEY_VALUE,'SHOW_REGISTRO');
+						generarListado(nameContentId,'','SHOW_LISTA_FILTRADO');
+
 					}else{
-						if(objeto.TIPO_CONSULTA == 'UPDATE'){
-							$("#"+nameContentId+" .key_value").val(objeto.KEY_VALUE);
-							showFicha(nameContentId,objeto.KEY_VALUE,'SHOW_REGISTRO');
-						}else{ 
-							$("#respuesta").html(response); 
-						}
+						$("#respuesta").html(response); 
 					}
 
 					//se asigna el codigo de referencia
 
-					$("#"+nameContentId+" .editar-registro").data('codigo',objeto.KEY_VALUE);
+					
 					console.log(response); 	
 							
 				}
@@ -241,6 +233,7 @@
 
 		$(document).on("change","#" +nameContentId +" .cambio-registro",function(){
 	 		$("#"+nameContentId+" .key_value").val($(this).val());
+	 		$("#"+nameContentId+" .key_value_static").val($(this).val());
 	 		showFicha(nameContentId,$(this).val(),'SHOW_REGISTRO');
 	 	});
 
@@ -263,8 +256,8 @@
 
 		$(document).on('click','#'+nameContentId+' .editar-registro',function(){
 		 		
-		 	var button = $(event.relatedTarget); // Boton que activo el modal
-			var codigo = button.data('codigo'); // Extract info from data-* attributes
+		 	//var button = $(event.relatedTarget); // Boton que activo el modal
+			//var codigo = button.data('codigo'); // Extract info from data-* attributes
 
 			$.ajax({
 				type: "POST",
@@ -272,7 +265,7 @@
 				data: { 
 					TABLA 		: 	$("#"+nameContentId+" .tabla").val(),
 					KEY_TABLA 	: 	$("#"+nameContentId+" .key_tabla").val(),
-					KEY_VALUE 	: 	$("#"+nameContentId+" .key_value").val(),
+					KEY_VALUE 	: 	$("#"+nameContentId+" .key_value_static").val(),
 					CASO 		: 	'SHOW_REGISTRO'
 				},
 
@@ -289,7 +282,7 @@
 						console.log(objeto.MENSAJE);
 						console.log('error-boton-editar');
 					}else{
-						$("#ficha-envio .valor").each(function(){
+						$("#"+nameContentId+" .valor").each(function(){
 							for(var i=0;i<objeto.length;i++){
 								//Asignando a los input su valor correspondiente que se extrae desde mysql php
 								$(this).val(objeto[i][$(this).attr('name')]);
@@ -313,15 +306,33 @@
 
 		});	
 
-		// iniciando el documento con la primera ficha disponible
+		/*	
+			+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			|																	|
+			|					BOOOT INICIO DEL SCRIPT 						|
+			|																	|
+			+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  
+		*/
 
-		showFicha(nameContentId,'','SHOW_REGISTRO_DEFECTO');
+		if(keyValueInicial>0){
 
-		/**** inicio de listado ***/
+			
+			$("#"+nameContentId+" .key_value").val(keyValueInicial);
+			$("#"+nameContentId+" .key_value_static").val(keyValueInicial);
+			showFicha(nameContentId,'','SHOW_REGISTRO');
 
-		generarListado(nameContentId,'','SHOW_LISTA_FILTRADO');
+			/**** inicio de listado ***/
+			generarListado(nameContentId,keyValueInicial,'SHOW_LISTA_FILTRADO');
 
-		/**** fin de listado ****/	
+	 	}else{
+
+			showFicha(nameContentId,'','SHOW_REGISTRO_DEFECTO');	
+
+			/**** inicio de listado ***/
+			generarListado(nameContentId,'','SHOW_LISTA_FILTRADO');		
+
+	 	}
+
 	});		
 </script>
 </head>
@@ -395,6 +406,7 @@
 								<input type="hidden" class="tabla" name="TABLA" value="direcciones_envio">
 								<input type="hidden" class="key_tabla" name="KEY_TABLA" value="IDENVIO">
 								<input type="hidden" class="key_value" name="KEY_VALUE" value="">
+								<input type="hidden" class="key_value_static" name="direcciones_envio[IDENVIO]" value="">
 
 							</form>
 
