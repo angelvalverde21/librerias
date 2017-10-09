@@ -2,14 +2,14 @@
 
 
 	$AYV['url']['scheme']			= 'http://';
-	$AYV['url']['domain']			= '192.168.2.100';
+	$AYV['url']['domain']			= 'localhost';
 	$AYV['url']['folder']			= '/librerias';
 	$AYV['url_global']['system'] 	= $AYV['url']['scheme'].$AYV['url']['domain'].$AYV['url']['folder'];
 		
 	/* perfil de database */
 		
 	$AYV['db']['user']		=	'root';
-	$AYV['db']['pass']		=	'root';
+	$AYV['db']['pass']		=	'';
 	$AYV['db']['name']		=	'test';
 	$AYV['db']['host']		=	'localhost';
 	

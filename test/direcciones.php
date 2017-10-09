@@ -48,11 +48,9 @@
 		var extraerValorAtributo;
 		var guardarCambios;
 
-	 	generarListado = function(nameContentId,selected=''){
+	 	generarListado = function(nameContentId,selected='',caso){
 
-	 		if(selected==''){
-	 			selected =keyValueInicial;
-	 		}
+	 		var caso;
 
 			$.ajax({
 
@@ -61,7 +59,8 @@
 				data: { 
 					TABLA 				: 	$("#"+nameContentId+" .tabla").val(),
 					KEY_PARENT 			: 	keyParent,
-					KEY_PARENT_VALUE 	: 	keyParentvalue
+					KEY_PARENT_VALUE 	: 	keyParentvalue,
+					CASO 				: 	caso
 				},
 
 				beforeSend: function () {
@@ -79,17 +78,35 @@
 
 					var option_listado ="";
 
-					for(var i=0;i<objeto_listado.length;i++){
-											
-						if(objeto_listado[i][idPrincipal]==selected){
-							option_listado = option_listado + '<option selected value="'+objeto_listado[i][idPrincipal]+'">'+objeto_listado[i][labelSelect]+'</option>';
+		 			if(selected==''){
 
-						}else{
-							option_listado = option_listado + '<option value="'+objeto_listado[i][idPrincipal]+'">'+objeto_listado[i][labelSelect]+'</option>';
+						for(var i=0;i<objeto_listado.length;i++){
+												
+							if(objeto_listado[i][idPrincipal]==selected || objeto_listado[i]['DEFECTO']=='1'){
+								option_listado = option_listado + '<option selected value="'+objeto_listado[i][idPrincipal]+'">'+objeto_listado[i][labelSelect]+'</option>';
 
+							}else{
+								option_listado = option_listado + '<option value="'+objeto_listado[i][idPrincipal]+'">'+objeto_listado[i][labelSelect]+'</option>';
+
+							}
+							
 						}
-						
-					}
+
+		 			}else{
+
+						for(var i=0;i<objeto_listado.length;i++){
+												
+							if(objeto_listado[i][idPrincipal]==selected){
+								option_listado = option_listado + '<option selected value="'+objeto_listado[i][idPrincipal]+'">'+objeto_listado[i][labelSelect]+'</option>';
+
+							}else{
+								option_listado = option_listado + '<option value="'+objeto_listado[i][idPrincipal]+'">'+objeto_listado[i][labelSelect]+'</option>';
+
+							}
+							
+						}
+		 			}
+
 
 					$("#"+nameContentId+" .selector-direccion .cambio-registro").html(option_listado);
 									
@@ -97,24 +114,22 @@
 			});		
 	 	}
 
-	 	showFicha = function(nameContentId,selected=''){
+	 	showFicha = function(nameContentId,selected='',caso){
 
+	 		var caso;
 	 		var key_value = $("#"+nameContentId+" .key_value").val();
-
-	 		if(selected>0){
-	 			$("#"+nameContentId+" .key_value").val(selected);
-	 		}
 
 			$.ajax({
 
 				type: "POST",
 				url: "query.php",
 				data: { 
-					TABLA 		: 	$("#"+nameContentId+" .tabla").val(),
-					KEY_TABLA 	: 	$("#"+nameContentId+" .key_tabla").val(),
-					KEY_VALUE 	: 	key_value,
-					KEY_PARENT 	: 	keyParent,
-					KEY_PARENT_VALUE : keyParentvalue
+					KEY_PARENT 			: 	keyParent,
+					KEY_PARENT_VALUE 	: 	keyParentvalue,
+					TABLA 				: 	$("#"+nameContentId+" .tabla").val(),
+					KEY_TABLA 			: 	$("#"+nameContentId+" .key_tabla").val(),
+					KEY_VALUE 			: 	key_value,
+					CASO 				: 	caso
 				},
 
 				beforeSend: function () {
@@ -123,22 +138,22 @@
 
 				success:  function (response) {
 
+					console.log(response);
+
 					//console.log(JSON.parse(response));
+
 					var objeto = JSON.parse(response);
 
-					if(objeto.MENSAJE == 'undefined'){
-						console.log(objeto.MENSAJE);
-					}else{
+					var cadena="";
 
-						var cadena="";
-
+					for(var i=0;i<objeto.length;i++){
 						//recorriendo los campos inputs, selects del formulario
 						$("#"+nameContentId+" .valor").each(function(){
-														
-						//Asignando a los input su valor correspondiente que se extrae desde mysql php
-						cadena += "<li>" +$(this).attr('placeholder') + ": " + objeto[$(this).attr('name')] + "</li>";
-								
-						//alert($(this).attr('name'));
+
+							//Asignando a los input su valor correspondiente que se extrae desde mysql php
+							cadena += "<li>" +$(this).attr('placeholder') + ": " + objeto[i][$(this).attr('name')] + "</li>";
+													
+							//alert($(this).attr('name'));
 						});
 
 						$("#"+nameContentId+" .respuesta-ficha").html(cadena); 	 
@@ -146,16 +161,11 @@
 						//Asignando valores al KEY_VALUE
 
 						if(key_value=='undefined' || key_value == ''){
-							$("#"+nameContentId+" .key_value").val(objeto[idPrincipal]);
+							$("#"+nameContentId+" .key_value").val(objeto[i][idPrincipal]);
 						}
-
-						/**** inicio de listado ***/
-
-						generarListado(nameContentId,selected);
-
-						/**** fin de listado ****/
-
+											
 					}
+					
 				}
 			});		
 		}
@@ -202,14 +212,16 @@
 				success:  function (response) {
 					//console.log(response); 
 					objeto = JSON.parse(response);
+
+
 					
 					if(objeto.TIPO_CONSULTA == 'INSERT'){
 						$("#"+nameContentId+" .key_value").val(objeto.KEY_VALUE);
-						showFicha(nameContentId,objeto.KEY_VALUE);
+						showFicha(nameContentId,objeto.KEY_VALUE,'SHOW_REGISTRO');
 					}else{
 						if(objeto.TIPO_CONSULTA == 'UPDATE'){
 							$("#"+nameContentId+" .key_value").val(objeto.KEY_VALUE);
-							showFicha(nameContentId,objeto.KEY_VALUE);
+							showFicha(nameContentId,objeto.KEY_VALUE,'SHOW_REGISTRO');
 						}else{ 
 							$("#respuesta").html(response); 
 						}
@@ -225,15 +237,11 @@
 			});				
 		}
 
-		// iniciando el documento con la primera ficha disponible
-
-		showFicha(nameContentId);
-
 		//Generar listado al hacer click en cambiar de direccion
 
 		$(document).on("change","#" +nameContentId +" .cambio-registro",function(){
-	 		$("#"+nameContentId+" .editar-registro").data("codigo",$(this).val());
-	 		showFicha(nameContentId,$(this).val());
+	 		$("#"+nameContentId+" .key_value").val($(this).val());
+	 		showFicha(nameContentId,$(this).val(),'SHOW_REGISTRO');
 	 	});
 
 		//Click en el boton NUEVO REGISTRO
@@ -255,8 +263,8 @@
 
 		$(document).on('click','#'+nameContentId+' .editar-registro',function(){
 		 		
-		 	var button = $(event.relatedTarget) // Boton que activo el modal
-			var codigo = button.data('codigo') // Extract info from data-* attributes
+		 	var button = $(event.relatedTarget); // Boton que activo el modal
+			var codigo = button.data('codigo'); // Extract info from data-* attributes
 
 			$.ajax({
 				type: "POST",
@@ -264,7 +272,8 @@
 				data: { 
 					TABLA 		: 	$("#"+nameContentId+" .tabla").val(),
 					KEY_TABLA 	: 	$("#"+nameContentId+" .key_tabla").val(),
-					KEY_VALUE 	: 	$("#"+nameContentId+" .editar-registro").data('codigo')
+					KEY_VALUE 	: 	$("#"+nameContentId+" .key_value").val(),
+					CASO 		: 	'SHOW_REGISTRO'
 				},
 
 				beforeSend: function () {
@@ -281,9 +290,11 @@
 						console.log('error-boton-editar');
 					}else{
 						$("#ficha-envio .valor").each(function(){
-							//Asignando a los input su valor correspondiente que se extrae desde mysql php
-							$(this).val(objeto[$(this).attr('name')]);
-							//alert($(this).attr('name'));
+							for(var i=0;i<objeto.length;i++){
+								//Asignando a los input su valor correspondiente que se extrae desde mysql php
+								$(this).val(objeto[i][$(this).attr('name')]);
+								//alert($(this).attr('name'));
+							}
 						});
 					}
 						//$("#respuesta-ficha").html(cadena); 
@@ -302,6 +313,15 @@
 
 		});	
 
+		// iniciando el documento con la primera ficha disponible
+
+		showFicha(nameContentId,'','SHOW_REGISTRO_DEFECTO');
+
+		/**** inicio de listado ***/
+
+		generarListado(nameContentId,'','SHOW_LISTA_FILTRADO');
+
+		/**** fin de listado ****/	
 	});		
 </script>
 </head>
